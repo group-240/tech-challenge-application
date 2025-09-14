@@ -19,6 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * </p>
  */
 @WebMvcTest(HealthCheckRestController.class)
+@AutoConfigureMockMvc(addFilters = false) // desativa segurança
 public class HealthCheckControllerTest {
 
     @Autowired
