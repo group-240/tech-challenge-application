@@ -31,7 +31,7 @@ public class HealthCheckControllerTest {
     @Test
     @DisplayName("Deve retornar status OK e informações de saúde da aplicação")
     public void healthCheckShouldReturnOk() throws Exception {
-        mockMvc.perform(get("/health")
+        mockMvc.perform(get("/api/health")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("UP"))
