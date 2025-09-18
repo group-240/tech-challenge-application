@@ -46,19 +46,19 @@ GitHub Secrets → Terraform → Kubernetes Secrets → Pods
 ## 🍔 API Endpoints
 
 ### Públicos (Sem autenticação)
-- `GET /api/health` - Status da aplicação
-- `GET /api/categories` - Listar categorias
+- `GET  /api/health` - Status da aplicação
+- `GET  /api/categories` - Listar categorias
 - `POST /api/categories` - Criar categoria
-- `GET /api/products` - Listar produtos
+- `GET  /api/products` - Listar produtos
 - `POST /api/products` - Criar produto
 - `POST /api/customers` - Registrar cliente
 - `POST /api/webhook/payment` - Webhook Mercado Pago
 
 ### Protegidos (Requer JWT)
-- `GET /api/customers` - Listar clientes
+- `GET  /api/customers` - Listar clientes
 - `POST /api/orders` - Criar pedido
-- `GET /api/orders` - Listar pedidos
-- `PUT /api/orders/{id}/status` - Atualizar status
+- `GET  /api/orders` - Listar pedidos
+- `PUT  /api/orders/{id}/status` - Atualizar status
 
 ## 🏛️ Clean Architecture
 
