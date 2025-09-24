@@ -55,9 +55,9 @@ GitHub Secrets → Terraform → Kubernetes Secrets → Pods
 - `POST /api/webhook/payment` - Webhook Mercado Pago
 
 ### Protegidos (Requer JWT)
-- `GET  /api/customers` - Listar clientes
-- `POST /api/orders` - Criar pedido
-- `GET  /api/orders` - Listar pedidos
+- `GET  /api/customers`          - Listar clientes
+- `POST /api/orders`             - Criar pedido
+- `GET  /api/orders`             - Listar pedidos
 - `PUT  /api/orders/{id}/status` - Atualizar status
 
 ## 🏛️ Clean Architecture
