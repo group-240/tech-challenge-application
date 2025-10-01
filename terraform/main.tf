@@ -10,7 +10,7 @@ terraform {
     }
   }
   backend "s3" {
-    bucket         = "fiap-tech-challenge-tfstate-bucket"
+    bucket         = "tech-challenge-tfstate-533267363894"
     key            = "application/terraform.tfstate"
     region         = "us-east-1"
     dynamodb_table = "terraform-lock"
@@ -25,7 +25,7 @@ provider "aws" {
 data "terraform_remote_state" "core" {
   backend = "s3"
   config = {
-    bucket = "fiap-tech-challenge-tfstate-bucket"
+    bucket = "tech-challenge-tfstate-533267363894"
     key    = "core/terraform.tfstate"
     region = "us-east-1"
   }
@@ -34,7 +34,7 @@ data "terraform_remote_state" "core" {
 data "terraform_remote_state" "database" {
   backend = "s3"
   config = {
-    bucket = "fiap-tech-challenge-tfstate-bucket"
+    bucket = "tech-challenge-tfstate-533267363894"
     key    = "database/terraform.tfstate"
     region = "us-east-1"
   }
@@ -67,7 +67,7 @@ resource "kubernetes_config_map" "app_config" {
   }
 
   data = {
-    SPRING_PROFILES_ACTIVE = "prod"
+    SPRING_PROFILES_ACTIVE = "dev"
     DB_HOST               = data.terraform_remote_state.database.outputs.rds_endpoint
     DB_PORT               = "5432"
     DB_NAME               = "techchallenge"

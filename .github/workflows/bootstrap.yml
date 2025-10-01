@@ -1,0 +1,54 @@
+name: Bootstrap - Create S3 Backend
+
+on:
+  workflow_dispatch:  # Permite executar manualmente
+
+env:
+  AWS_REGION: us-east-1
+  TF_VERSION: 1.5.0
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: ${{ env.TF_VERSION }}
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Terraform Init (Bootstrap)
+      working-directory: ./bootstrap
+      run: terraform init
+
+    - name: Terraform Validate (Bootstrap)
+      working-directory: ./bootstrap
+      run: terraform validate
+
+    - name: Terraform Plan (Bootstrap)
+      working-directory: ./bootstrap
+      run: terraform plan
+
+    - name: Terraform Apply (Bootstrap)
+      working-directory: ./bootstrap
+      run: terraform apply -auto-approve
+
+    - name: Success Message
+      run: |
+        echo "✅ Bootstrap concluído com sucesso!"
+        echo ""
+        echo "Recursos criados:"
+        echo "  - S3 Bucket: tech-challenge-tfstate-533267363894"
+        echo "  - DynamoDB Table: tech-challenge-terraform-lock-533267363894"
+        echo ""
+        echo "Agora você pode executar o workflow main.yml!"
