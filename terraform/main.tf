@@ -10,7 +10,7 @@ terraform {
     }
   }
   backend "s3" {
-    bucket         = "tech-challenge-tfstate-533267363894"
+    bucket         = "tech-challenge-tfstate-533267363894-3"
     key            = "application/terraform.tfstate"
     region         = "us-east-1"
     dynamodb_table = "terraform-lock"
@@ -25,7 +25,7 @@ provider "aws" {
 data "terraform_remote_state" "core" {
   backend = "s3"
   config = {
-    bucket = "tech-challenge-tfstate-533267363894"
+    bucket = "tech-challenge-tfstate-533267363894-3"
     key    = "core/terraform.tfstate"
     region = "us-east-1"
   }
@@ -34,7 +34,7 @@ data "terraform_remote_state" "core" {
 data "terraform_remote_state" "database" {
   backend = "s3"
   config = {
-    bucket = "tech-challenge-tfstate-533267363894"
+    bucket = "tech-challenge-tfstate-533267363894-3"
     key    = "database/terraform.tfstate"
     region = "us-east-1"
   }
@@ -175,7 +175,7 @@ resource "kubernetes_service" "tech_challenge_service" {
 
   spec {
     selector = {
-      app = kubernetes_deployment.tech_challenge_app.metadata[0].name
+      app = "tech-challenge-app"
     }
 
     port {
@@ -183,6 +183,6 @@ resource "kubernetes_service" "tech_challenge_service" {
       target_port = 8080
     }
 
-    type = "ClusterIP"
+    type = "NodePort"
   }
 }
