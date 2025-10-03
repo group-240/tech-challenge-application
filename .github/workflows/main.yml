@@ -9,7 +9,7 @@ on:
 env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: tech-challenge-api
-  EKS_CLUSTER_NAME: tech-challenge-cluster
+  EKS_CLUSTER_NAME: tech-challenge-eks
 
 jobs:
   build-and-test:
