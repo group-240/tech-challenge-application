@@ -2,9 +2,9 @@ name: Tech Challenge Application CI/CD
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
 
 env:
   AWS_REGION: us-east-1
