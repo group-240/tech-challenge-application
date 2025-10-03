@@ -22,8 +22,8 @@ provider "aws" {
 locals {
   # Configuração específica para conta AWS 533267363894
   account_id  = "533267363894"
-  bucket_name = "tech-challenge-tfstate-${local.account_id}-3"
-  table_name  = "tech-challenge-terraform-lock-${local.account_id}-3"
+  bucket_name = "tech-challenge-tfstate-${local.account_id}-4"
+  table_name  = "tech-challenge-terraform-lock-${local.account_id}-4"
   
   common_tags = {
     Environment = "dev"
