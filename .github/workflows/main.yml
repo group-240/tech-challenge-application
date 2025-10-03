@@ -38,7 +38,8 @@ jobs:
       run: mvn clean package -DskipTests
 
     - name: Upload artifact
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      if: github.event_name == 'push'
+      #if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       uses: actions/upload-artifact@v4
       with:
         name: app-jar
