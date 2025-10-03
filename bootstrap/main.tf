@@ -125,3 +125,17 @@ resource "aws_s3_bucket_policy" "terraform_state" {
     ]
   })
 }
+
+# ------------------------------------------------------------------
+# Repositório ECR para armazenar as imagens da aplicação
+# ------------------------------------------------------------------
+resource "aws_ecr_repository" "application" {
+  name                 = "tech-challenge-application"
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+
+  tags = local.common_tags
+}

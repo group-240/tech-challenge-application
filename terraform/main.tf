@@ -31,9 +31,6 @@ data "terraform_remote_state" "core" {
   }
 }
 
-# -------------------------------
-# REMOVIDO: database (comentado)
-# -------------------------------
 # data "terraform_remote_state" "database" {
 #   backend = "s3"
 #   config = {
