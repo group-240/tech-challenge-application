@@ -10,10 +10,10 @@ terraform {
     }
   }
   backend "s3" {
-    bucket         = "tech-challenge-tfstate-533267363894-3"
+    bucket         = "tech-challenge-tfstate-533267363894-4"
     key            = "application/terraform.tfstate"
     region         = "us-east-1"
-    dynamodb_table = "terraform-lock"
+    dynamodb_table = "tech-challenge-terraform-lock-533267363894-4"
     encrypt        = true
   }
 }
@@ -25,7 +25,7 @@ provider "aws" {
 data "terraform_remote_state" "core" {
   backend = "s3"
   config = {
-    bucket = "tech-challenge-tfstate-533267363894-3"
+    bucket = "tech-challenge-tfstate-533267363894-4"
     key    = "core/terraform.tfstate"
     region = "us-east-1"
   }
@@ -34,8 +34,17 @@ data "terraform_remote_state" "core" {
 data "terraform_remote_state" "database" {
   backend = "s3"
   config = {
-    bucket = "tech-challenge-tfstate-533267363894-3"
+    bucket = "tech-challenge-tfstate-533267363894-4"
     key    = "database/terraform.tfstate"
+    region = "us-east-1"
+  }
+}
+
+data "terraform_remote_state" "gateway" {
+  backend = "s3"
+  config = {
+    bucket = "tech-challenge-tfstate-533267363894-4"
+    key    = "gateway/terraform.tfstate"
     region = "us-east-1"
   }
 }
@@ -68,13 +77,14 @@ resource "kubernetes_config_map" "app_config" {
 
   data = {
     SPRING_PROFILES_ACTIVE = "dev"
-    DB_HOST               = data.terraform_remote_state.database.outputs.rds_endpoint
-    DB_PORT               = "5432"
-    DB_NAME               = "techchallenge"
+    DB_HOST               = data.terraform_remote_state.database.outputs.rds_address
+    DB_PORT               = tostring(data.terraform_remote_state.database.outputs.rds_port)
+    DB_NAME               = data.terraform_remote_state.database.outputs.rds_db_name
     DB_USER               = "postgres"
     AWS_REGION            = "us-east-1"
     COGNITO_USER_POOL_ID  = data.terraform_remote_state.core.outputs.cognito_user_pool_id
     COGNITO_CLIENT_ID     = data.terraform_remote_state.core.outputs.cognito_user_pool_client_id
+    API_GATEWAY_URL       = data.terraform_remote_state.gateway.outputs.api_gateway_invoke_url
   }
 }
 
@@ -179,10 +189,53 @@ resource "kubernetes_service" "tech_challenge_service" {
     }
 
     port {
+      name        = "http"
       port        = 80
       target_port = 8080
+      protocol    = "TCP"
     }
 
-    type = "NodePort"
+    type = "ClusterIP" # Interno apenas, NLB está no infra-core
   }
+}
+
+# Target Group Binding para conectar Kubernetes ao NLB
+resource "kubernetes_manifest" "target_group_binding" {
+  manifest = {
+    apiVersion = "elbv2.k8s.aws/v1beta1"
+    kind       = "TargetGroupBinding"
+    metadata = {
+      name      = "tech-challenge-tgb"
+      namespace = "default"
+    }
+    spec = {
+      serviceRef = {
+        name = kubernetes_service.tech_challenge_service.metadata[0].name
+        port = 80
+      }
+      targetGroupARN = data.terraform_remote_state.core.outputs.target_group_arn
+      targetType     = "instance" # Para EKS com EC2 nodes
+    }
+  }
+
+  depends_on = [
+    kubernetes_service.tech_challenge_service,
+    data.terraform_remote_state.core
+  ]
+}
+
+# Outputs para integração com API Gateway
+output "service_name" {
+  description = "Nome do Kubernetes Service"
+  value       = kubernetes_service.tech_challenge_service.metadata[0].name
+}
+
+output "service_namespace" {
+  description = "Namespace do Kubernetes Service"
+  value       = kubernetes_namespace.tech_challenge.metadata[0].name
+}
+
+output "service_cluster_ip" {
+  description = "Cluster IP do service (interno)"
+  value       = kubernetes_service.tech_challenge_service.spec[0].cluster_ip
 }
