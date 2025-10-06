@@ -52,16 +52,13 @@ management:
         enabled: true
     tags:
       application: ${spring.application.name}
-      environment: ${SPRING_PROFILES_ACTIVE:dev}
+      environment: dev
 
-# Logging configuration (overridden by logback-spring.xml)
+# Logging configuration (JSON estruturado - SRE)
+# Configuração detalhada em: logback-spring.xml
 logging:
   level:
     root: INFO
-    com.fiap.techchallenge: DEBUG
-    org.springframework.web: INFO
-    org.hibernate.SQL: INFO
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    com.fiap.techchallenge: INFO
 
 mercado-pago.access-token: TEST-6132655548485399-050519-5c52fb1e9a2a627837f4bff581e36402-495359857
