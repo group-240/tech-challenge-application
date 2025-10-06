@@ -1,0 +1,146 @@
+2025-10-06T03:49:14.780Z
+{
+    "kind": "Event",
+    "apiVersion": "audit.k8s.io/v1",
+    "level": "Metadata",
+    "auditID": "512ebd59-1f5a-4150-9f54-4bd2b3f29e27",
+    "stage": "ResponseComplete",
+    "requestURI": "/apis/elbv2.k8s.aws/v1beta1/namespaces/tech-challenge/targetgroupbindings/tech-challenge-tgb?fieldManager=Terraform&force=false",
+    "verb": "patch",
+    "user": {
+        "username": "kubernetes-admin",
+        "uid": "aws-iam-authenticator:891377164819:AROA47CRYEIJTI3P26IRR",
+        "groups": [
+            "system:masters",
+            "system:authenticated"
+        ],
+        "extra": {
+            "accessKeyId": [
+                "ASIA47CRYEIJX2JLK75W"
+            ],
+            "arn": [
+                "arn:aws:sts::891377164819:assumed-role/voclabs/user4155768=lorraineolegario16@gmail.com"
+            ],
+            "canonicalArn": [
+                "arn:aws:iam::891377164819:role/voclabs"
+            ],
+            "principalId": [
+                "AROA47CRYEIJTI3P26IRR"
+            ],
+            "sessionName": [
+                "user4155768=lorraineolegario16@gmail.com"
+            ],
+            "sigs.k8s.io/aws-iam-authenticator/principalId": [
+                "AROA47CRYEIJTI3P26IRR"
+            ]
+        }
+    },
+    "sourceIPs": [
+        "20.161.60.99"
+    ],
+    "userAgent": "terraform-provider-kubernetes_v2.38.0_x5/v0.0.0 (linux/amd64) kubernetes/$Format",
+    "objectRef": {
+        "resource": "targetgroupbindings",
+        "namespace": "tech-challenge",
+        "name": "tech-challenge-tgb",
+        "apiGroup": "elbv2.k8s.aws",
+        "apiVersion": "v1beta1"
+    },
+    "responseStatus": {
+        "metadata": {},
+        "status": "Failure",
+        "message": "admission webhook \"mtargetgroupbinding.elbv2.k8s.aws\" denied the request: unable to get target group IP address type: operation error Elastic Load Balancing v2: DescribeTargetGroups, get identity: get credentials: failed to refresh cached credentials, no EC2 IMDS role found, operation error ec2imds: GetMetadata, canceled, context deadline exceeded",
+        "reason": "Forbidden",
+        "code": 403
+    },
+    "requestReceivedTimestamp": "2025-10-06T03:49:09.548828Z",
+    "stageTimestamp": "2025-10-06T03:49:14.559572Z",
+    "annotations": {
+        "apiserver.latency.k8s.io/authorization": "3.045µs",
+        "apiserver.latency.k8s.io/etcd": "3.571233ms",
+        "apiserver.latency.k8s.io/mutating-webhook": "5.00557831s",
+        "apiserver.latency.k8s.io/response-write": "1.039µs",
+        "apiserver.latency.k8s.io/serialize-response-object": "123.523µs",
+        "apiserver.latency.k8s.io/total": "5.010744503s",
+        "authorization.k8s.io/decision": "allow",
+        "authorization.k8s.io/reason": "",
+        "mutation.webhook.admission.k8s.io/round_0_index_2": "{\"configuration\":\"aws-load-balancer-webhook\",\"webhook\":\"mtargetgroupbinding.elbv2.k8s.aws\",\"mutated\":false}"
+    }
+}
+
+{"kind":"Event","apiVersion":"audit.k8s.io/v1","level":"Metadata","auditID":"512ebd59-1f5a-4150-9f54-4bd2b3f29e27","stage":"ResponseComplete","requestURI":"/apis/elbv2.k8s.aws/v1beta1/namespaces/tech-challenge/targetgroupbindings/tech-challenge-tgb?fieldManager=Terraform\u0026force=false","verb":"patch","user":{"username":"kubernetes-admin","uid":"aws-iam-authenticator:891377164819:AROA47CRYEIJTI3P26IRR","groups":["system:masters","system:authenticated"],"extra":{"accessKeyId":["ASIA47CRYEIJX2JLK75W"],"arn":["arn:aws:sts::891377164819:assumed-role/voclabs/user4155768=lorraineolegario16@gmail.com"],"canonicalArn":["arn:aws:iam::891377164819:role/voclabs"],"principalId":["AROA47CRYEIJTI3P26IRR"],"sessionName":["user4155768=lorraineolegario16@gmail.com"],"sigs.k8s.io/aws-iam-authenticator/principalId":["AROA47CRYEIJTI3P26IRR"]}},"sourceIPs":["20.161.60.99"],"userAgent":"terraform-provider-kubernetes_v2.38.0_x5/v0.0.0 (linux/amd64) kubernetes/$Format","objectRef":{"resource":"targetgroupbindings","namespace":"tech-challenge","name":"tech-challenge-tgb","apiGroup":"elbv2.k8s.aws","apiVersion":"v1beta1"},"responseStatus":{"metadata":{},"status":"Failure","message":"admission webhook \"mtargetgroupbinding.elbv2.k8s.aws\" denied the request: unable to get target group IP address type: operation error Elastic Load Balancing v2: DescribeTargetGroups, get identity: get credentials: failed to refresh cached credentials, no EC2 IMDS role found, operation error ec2imds: GetMetadata, canceled, context deadline exceeded","reason":"Forbidden","code":403},"requestReceivedTimestamp":"2025-10-06T03:49:09.548828Z","stageTimestamp":"2025-10-06T03:49:14.559572Z","annotations":{"apiserver.latency.k8s.io/authorization":"3.045µs","apiserver.latency.k8s.io/etcd":"3.571233ms","apiserver.latency.k8s.io/mutating-webhook":"5.00557831s","apiserver.latency.k8s.io/response-write":"1.039µs","apiserver.latency.k8s.io/serialize-response-object":"123.523µs","apiserver.latency.k8s.io/total":"5.010744503s","authorization.k8s.io/decision":"allow","authorization.k8s.io/reason":"","mutation.webhook.admission.k8s.io/round_0_index_2":"{\"configuration\":\"aws-load-balancer-webhook\",\"webhook\":\"mtargetgroupbinding.elbv2.k8s.aws\",\"mutated\":false}"}}
+kube-apiserver-audit-e4305e87b38607c8e021a4ae19ed8f2e
+2025-10-06T03:56:53.000Z
+W1006 03:56:53.677595      10 logging.go:55] [core] [Channel #38686 SubChannel #38689]grpc: addrConn.createTransport failed to connect to {Addr: "172.16.96.16:12379", ServerName: "172.16.96.16:12379", }. Err: connection error: desc = "transport: failed to write client preface: write tcp 172.16.38.247:60930->172.16.96.16:12379: use of closed network connection"
+
+W1006 03:56:53.677595 10 logging.go:55] [core] [Channel #38686 SubChannel #38689]grpc: addrConn.createTransport failed to connect to {Addr: "172.16.96.16:12379", ServerName: "172.16.96.16:12379", }. Err: connection error: desc = "transport: failed to write client preface: write tcp 172.16.38.247:60930->172.16.96.16:12379: use of closed network connection"
+kube-apiserver-867f2ba113fb7bf63cf9799c2a46ce8c
+2025-10-06T04:05:58.051Z
+{
+    "kind": "Event",
+    "apiVersion": "audit.k8s.io/v1",
+    "level": "Metadata",
+    "auditID": "601cbc96-f4b6-4e6e-89a7-b2faf4d04b75",
+    "stage": "ResponseComplete",
+    "requestURI": "/apis/elbv2.k8s.aws/v1beta1/namespaces/tech-challenge/targetgroupbindings/tech-challenge-tgb?fieldManager=Terraform&force=false",
+    "verb": "patch",
+    "user": {
+        "username": "kubernetes-admin",
+        "uid": "aws-iam-authenticator:891377164819:AROA47CRYEIJTI3P26IRR",
+        "groups": [
+            "system:masters",
+            "system:authenticated"
+        ],
+        "extra": {
+            "accessKeyId": [
+                "ASIA47CRYEIJX2JLK75W"
+            ],
+            "arn": [
+                "arn:aws:sts::891377164819:assumed-role/voclabs/user4155768=lorraineolegario16@gmail.com"
+            ],
+            "canonicalArn": [
+                "arn:aws:iam::891377164819:role/voclabs"
+            ],
+            "principalId": [
+                "AROA47CRYEIJTI3P26IRR"
+            ],
+            "sessionName": [
+                "user4155768=lorraineolegario16@gmail.com"
+            ],
+            "sigs.k8s.io/aws-iam-authenticator/principalId": [
+                "AROA47CRYEIJTI3P26IRR"
+            ]
+        }
+    },
+    "sourceIPs": [
+        "52.234.41.64"
+    ],
+    "userAgent": "terraform-provider-kubernetes_v2.38.0_x5/v0.0.0 (linux/amd64) kubernetes/$Format",
+    "objectRef": {
+        "resource": "targetgroupbindings",
+        "namespace": "tech-challenge",
+        "name": "tech-challenge-tgb",
+        "apiGroup": "elbv2.k8s.aws",
+        "apiVersion": "v1beta1"
+    },
+    "responseStatus": {
+        "metadata": {},
+        "status": "Failure",
+        "message": "admission webhook \"mtargetgroupbinding.elbv2.k8s.aws\" denied the request: unable to get target group IP address type: operation error Elastic Load Balancing v2: DescribeTargetGroups, get identity: get credentials: failed to refresh cached credentials, no EC2 IMDS role found, operation error ec2imds: GetMetadata, canceled, context deadline exceeded",
+        "reason": "Forbidden",
+        "code": 403
+    },
+    "requestReceivedTimestamp": "2025-10-06T04:05:52.264706Z",
+    "stageTimestamp": "2025-10-06T04:05:57.274557Z",
+    "annotations": {
+        "apiserver.latency.k8s.io/authorization": "2.013µs",
+        "apiserver.latency.k8s.io/etcd": "3.257755ms",
+        "apiserver.latency.k8s.io/mutating-webhook": "5.004946719s",
+        "apiserver.latency.k8s.io/response-write": "721ns",
+        "apiserver.latency.k8s.io/serialize-response-object": "231.89µs",
+        "apiserver.latency.k8s.io/total": "5.009851148s",
+        "authorization.k8s.io/decision": "allow",
+        "authorization.k8s.io/reason": "",
+        "mutation.webhook.admission.k8s.io/round_0_index_2": "{\"configuration\":\"aws-load-balancer-webhook\",\"webhook\":\"mtargetgroupbinding.elbv2.k8s.aws\",\"mutated\":false}"
+    }
+}
