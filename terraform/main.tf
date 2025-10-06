@@ -9,12 +9,12 @@ terraform {
       version = "~> 2.0"
     }
   }
+
   backend "s3" {
-    bucket         = "tech-challenge-tfstate-533267363894-4"
-    key            = "application/terraform.tfstate"
-    region         = "us-east-1"
-    dynamodb_table = "terraform-lock"
-    encrypt        = true
+    bucket  = "tech-challenge-tfstate-533267363894-4"
+    key     = "application/terraform.tfstate"
+    region  = "us-east-1"
+    encrypt = true
   }
 }
 
