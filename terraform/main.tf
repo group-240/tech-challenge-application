@@ -98,7 +98,7 @@ resource "kubernetes_deployment" "tech_challenge_app" {
   }
 
   spec {
-    replicas = 2
+    replicas = 1  # Reduzido para 1 réplica (node t3.small tem apenas 2GB)
 
     selector {
       match_labels = {
@@ -139,8 +139,10 @@ resource "kubernetes_deployment" "tech_challenge_app" {
               path = "/api/health"
               port = 8080
             }
-            initial_delay_seconds = 60
+            initial_delay_seconds = 90   # Aumentado para dar tempo da JVM iniciar
             period_seconds        = 30
+            timeout_seconds       = 5
+            failure_threshold     = 3
           }
 
           readiness_probe {
@@ -148,18 +150,20 @@ resource "kubernetes_deployment" "tech_challenge_app" {
               path = "/api/health"
               port = 8080
             }
-            initial_delay_seconds = 30
+            initial_delay_seconds = 60   # Aumentado para aplicação Spring Boot
             period_seconds        = 10
+            timeout_seconds       = 3
+            failure_threshold     = 3
           }
 
           resources {
             requests = {
-              memory = "512Mi"
-              cpu    = "250m"
+              memory = "768Mi"  # Ajustado para Spring Boot com JVM
+              cpu    = "200m"   # Reduzido para caber no t3.small
             }
             limits = {
-              memory = "1Gi"
-              cpu    = "500m"
+              memory = "1280Mi" # ~1.25Gi - deixa espaço para o sistema
+              cpu    = "800m"   # Permite burst mas não monopoliza
             }
           }
         }
