@@ -41,6 +41,10 @@ resource "kubernetes_deployment" "tech_challenge_app" {
     namespace = kubernetes_namespace.tech_challenge.metadata[0].name
   }
 
+  # Não esperar por rollout - permite Terraform completar mesmo se pods não ficarem ready
+  # Útil quando imagem ainda não existe no ECR ou durante troubleshooting
+  wait_for_rollout = false
+
   spec {
     replicas = 1  # Reduzido para 1 réplica (node t3.small tem apenas 2GB)
 
