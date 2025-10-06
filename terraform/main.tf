@@ -195,11 +195,12 @@ resource "kubernetes_service" "tech_challenge_service" {
       protocol    = "TCP"
     }
 
-    type = "ClusterIP" # Interno apenas, NLB está no infra-core
+    type = "ClusterIP" # Interno apenas, NLB gerenciado via TargetGroupBinding
   }
 }
 
-# Target Group Binding para conectar Kubernetes ao NLB
+# TargetGroupBinding - Conecta automaticamente o service ao NLB
+# AWS Load Balancer Controller (instalado via Helm no infra-core) gerencia isso
 resource "kubernetes_manifest" "target_group_binding" {
   manifest = {
     apiVersion = "elbv2.k8s.aws/v1beta1"
@@ -214,7 +215,7 @@ resource "kubernetes_manifest" "target_group_binding" {
         port = 80
       }
       targetGroupARN = data.terraform_remote_state.core.outputs.target_group_arn
-      targetType     = "instance" # Para EKS com EC2 nodes
+      targetType     = "ip"  # Registra IPs dos pods diretamente
     }
   }
 
