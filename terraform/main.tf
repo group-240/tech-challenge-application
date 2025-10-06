@@ -75,6 +75,7 @@ resource "kubernetes_config_map" "app_config" {
     AWS_REGION            = "us-east-1"
     COGNITO_USER_POOL_ID  = data.terraform_remote_state.core.outputs.cognito_user_pool_id
     COGNITO_CLIENT_ID     = data.terraform_remote_state.core.outputs.cognito_user_pool_client_id
+    # API_GATEWAY_URL não é necessário na aplicação - apenas para referência externa
   }
 }
 
