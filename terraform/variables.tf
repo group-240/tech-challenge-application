@@ -2,7 +2,7 @@ variable "db_password" {
   description = "Database password - HARDCODED para ambiente DEV (apenas estudo)"
   type        = string
   sensitive   = true
-  default     = "DevPassword123!"
+  default     = "DevEnvironment2024!"
 }
 
 variable "jwt_secret" {
