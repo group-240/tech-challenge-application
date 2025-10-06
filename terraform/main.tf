@@ -31,14 +31,14 @@ data "terraform_remote_state" "core" {
   }
 }
 
-# data "terraform_remote_state" "database" {
-#   backend = "s3"
-#   config = {
-#     bucket = "tech-challenge-tfstate-533267363894-4"
-#     key    = "database/terraform.tfstate"
-#     region = "us-east-1"
-#   }
-# }
+data "terraform_remote_state" "database" {
+   backend = "s3"
+   config = {
+     bucket = "tech-challenge-tfstate-533267363894-4"
+     key    = "database/terraform.tfstate"
+     region = "us-east-1"
+   }
+}
 
 
 data "aws_eks_cluster" "cluster" {
@@ -71,16 +71,13 @@ resource "kubernetes_config_map" "app_config" {
 
   data = {
     SPRING_PROFILES_ACTIVE = "dev"
-    # -------------------------------
-    # REMOVIDO: banco (comentado)
-    # -------------------------------
     DB_HOST               = data.terraform_remote_state.database.outputs.rds_endpoint
     DB_PORT               = "5432"
     DB_NAME               = "techchallenge"
     DB_USER               = "postgres"
     AWS_REGION            = "us-east-1"
-    #COGNITO_USER_POOL_ID  = data.terraform_remote_state.core.outputs.cognito_user_pool_id
-    #COGNITO_CLIENT_ID     = data.terraform_remote_state.core.outputs.cognito_user_pool_client_id
+    COGNITO_USER_POOL_ID  = data.terraform_remote_state.core.outputs.cognito_user_pool_id
+    COGNITO_CLIENT_ID     = data.terraform_remote_state.core.outputs.cognito_user_pool_client_id
   }
 }
 
