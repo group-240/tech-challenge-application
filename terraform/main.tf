@@ -40,15 +40,6 @@ data "terraform_remote_state" "database" {
   }
 }
 
-data "terraform_remote_state" "gateway" {
-  backend = "s3"
-  config = {
-    bucket = "tech-challenge-tfstate-533267363894-4"
-    key    = "gateway/terraform.tfstate"
-    region = "us-east-1"
-  }
-}
-
 data "aws_eks_cluster" "cluster" {
   name = data.terraform_remote_state.core.outputs.eks_cluster_name
 }
@@ -84,7 +75,6 @@ resource "kubernetes_config_map" "app_config" {
     AWS_REGION            = "us-east-1"
     COGNITO_USER_POOL_ID  = data.terraform_remote_state.core.outputs.cognito_user_pool_id
     COGNITO_CLIENT_ID     = data.terraform_remote_state.core.outputs.cognito_user_pool_client_id
-    API_GATEWAY_URL       = data.terraform_remote_state.gateway.outputs.api_gateway_invoke_url
   }
 }
 
