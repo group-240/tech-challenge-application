@@ -11,7 +11,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket  = "tech-challenge-tfstate-533267363894-4"
+    bucket  = "tech-challenge-tfstate-533267363894-10"
     key     = "application/terraform.tfstate"
     region  = "us-east-1"
     encrypt = true
@@ -25,7 +25,7 @@ provider "aws" {
 data "terraform_remote_state" "core" {
   backend = "s3"
   config = {
-    bucket = "tech-challenge-tfstate-533267363894-4"
+    bucket = "tech-challenge-tfstate-533267363894-10"
     key    = "core/terraform.tfstate"
     region = "us-east-1"
   }
@@ -34,7 +34,7 @@ data "terraform_remote_state" "core" {
 data "terraform_remote_state" "database" {
    backend = "s3"
    config = {
-     bucket = "tech-challenge-tfstate-533267363894-4"
+     bucket = "tech-challenge-tfstate-533267363894-10"
      key    = "database/terraform.tfstate"
      region = "us-east-1"
    }
@@ -42,13 +42,13 @@ data "terraform_remote_state" "database" {
 
 
 data "aws_eks_cluster" "cluster" {
-  #name = data.terraform_remote_state.core.outputs.eks_cluster_name
-  name = "tech-challenge-eks"
+  name = data.terraform_remote_state.core.outputs.eks_cluster_name
+  #name = "tech-challenge-eks"
 }
 
 data "aws_eks_cluster_auth" "cluster" {
-  #name = data.terraform_remote_state.core.outputs.eks_cluster_name
-  name = "tech-challenge-eks"
+  name = data.terraform_remote_state.core.outputs.eks_cluster_name
+  #name = "tech-challenge-eks"
 }
 
 provider "kubernetes" {
@@ -88,9 +88,6 @@ resource "kubernetes_secret" "app_secrets" {
   }
 
   data = {
-    # -------------------------------
-    # REMOVIDO: banco (comentado)
-    # -------------------------------
     # DB_PASSWORD = var.db_password
     JWT_SECRET  = var.jwt_secret
   }
