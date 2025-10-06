@@ -74,10 +74,10 @@ resource "kubernetes_config_map" "app_config" {
     # -------------------------------
     # REMOVIDO: banco (comentado)
     # -------------------------------
-    # DB_HOST               = data.terraform_remote_state.database.outputs.rds_endpoint
-    # DB_PORT               = "5432"
-    # DB_NAME               = "techchallenge"
-    # DB_USER               = "postgres"
+    DB_HOST               = data.terraform_remote_state.database.outputs.rds_endpoint
+    DB_PORT               = "5432"
+    DB_NAME               = "techchallenge"
+    DB_USER               = "postgres"
     AWS_REGION            = "us-east-1"
     #COGNITO_USER_POOL_ID  = data.terraform_remote_state.core.outputs.cognito_user_pool_id
     #COGNITO_CLIENT_ID     = data.terraform_remote_state.core.outputs.cognito_user_pool_client_id
