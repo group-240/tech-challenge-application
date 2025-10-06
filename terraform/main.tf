@@ -191,6 +191,15 @@ resource "kubernetes_service" "tech_challenge_service" {
   metadata {
     name      = "tech-challenge-service"
     namespace = kubernetes_namespace.tech_challenge.metadata[0].name
+    
+    # SOLUÇÃO: Annotations do AWS Load Balancer Controller
+    # Deixa o controller gerenciar automaticamente o Target Group Binding
+    annotations = {
+      "service.beta.kubernetes.io/aws-load-balancer-type"              = "external"
+      "service.beta.kubernetes.io/aws-load-balancer-nlb-target-type"   = "ip"
+      "service.beta.kubernetes.io/aws-load-balancer-scheme"            = "internal"
+      "service.beta.kubernetes.io/aws-load-balancer-target-group-arn"  = data.terraform_remote_state.core.outputs.target_group_arn
+    }
   }
 
   spec {
@@ -205,35 +214,13 @@ resource "kubernetes_service" "tech_challenge_service" {
       protocol    = "TCP"
     }
 
-    type = "ClusterIP" # Interno apenas, NLB gerenciado via TargetGroupBinding
+    type = "LoadBalancer" # Muda para LoadBalancer para o controller processar annotations
   }
 }
 
-# TargetGroupBinding - Conecta automaticamente o service ao NLB
-# AWS Load Balancer Controller (instalado via Helm no infra-core) gerencia isso
-resource "kubernetes_manifest" "target_group_binding" {
-  manifest = {
-    apiVersion = "elbv2.k8s.aws/v1beta1"
-    kind       = "TargetGroupBinding"
-    metadata = {
-      name      = "tech-challenge-tgb"
-      namespace = kubernetes_namespace.tech_challenge.metadata[0].name
-    }
-    spec = {
-      serviceRef = {
-        name = kubernetes_service.tech_challenge_service.metadata[0].name
-        port = 80
-      }
-      targetGroupARN = data.terraform_remote_state.core.outputs.target_group_arn
-      targetType     = "ip"  # Registra IPs dos pods diretamente
-    }
-  }
-
-  depends_on = [
-    kubernetes_service.tech_challenge_service,
-    data.terraform_remote_state.core
-  ]
-}
+# REMOVIDO: TargetGroupBinding manual (agora gerenciado pelo controller via annotations)
+# O AWS Load Balancer Controller irá criar automaticamente baseado nas annotations acima
+# resource "kubernetes_manifest" "target_group_binding" { ... }
 
 # Outputs para integração com API Gateway
 output "service_name" {
