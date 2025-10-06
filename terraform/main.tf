@@ -100,6 +100,15 @@ resource "kubernetes_deployment" "tech_challenge_app" {
   spec {
     replicas = 1  # Reduzido para 1 réplica (node t3.small tem apenas 2GB)
 
+    # Estratégia de rolling update para evitar 2 pods simultâneos
+    strategy {
+      type = "RollingUpdate"
+      rolling_update {
+        max_surge       = 0  # Não criar pod extra durante update
+        max_unavailable = 1  # Pode ficar indisponível durante update
+      }
+    }
+
     selector {
       match_labels = {
         app = "tech-challenge-app"
@@ -120,6 +129,12 @@ resource "kubernetes_deployment" "tech_challenge_app" {
 
           port {
             container_port = 8080
+          }
+
+          # Variáveis de ambiente para otimizar JVM
+          env {
+            name  = "JAVA_OPTS"
+            value = "-Xms256m -Xmx768m -XX:MaxMetaspaceSize=128m -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
           }
 
           env_from {
@@ -158,12 +173,12 @@ resource "kubernetes_deployment" "tech_challenge_app" {
 
           resources {
             requests = {
-              memory = "768Mi"  # Ajustado para Spring Boot com JVM
-              cpu    = "200m"   # Reduzido para caber no t3.small
+              memory = "512Mi"  # Reduzido para caber no t3.small (2GB node)
+              cpu    = "150m"   # CPU mínima para Spring Boot
             }
             limits = {
-              memory = "1280Mi" # ~1.25Gi - deixa espaço para o sistema
-              cpu    = "800m"   # Permite burst mas não monopoliza
+              memory = "1Gi"    # Limite de 1GB (deixa ~1GB para sistema)
+              cpu    = "500m"   # CPU suficiente para operação
             }
           }
         }

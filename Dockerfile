@@ -14,5 +14,10 @@ COPY --from=build /app/target/*.jar app.jar
 # Instalar curl para health check
 RUN apk add --no-cache curl
 
+# Variáveis de ambiente padrão para JVM (podem ser sobrescritas no Kubernetes)
+ENV JAVA_OPTS="-Xms256m -Xmx512m -XX:MaxMetaspaceSize=128m -XX:+UseG1GC"
+
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+# Usar JAVA_OPTS no entrypoint
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
