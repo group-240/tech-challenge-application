@@ -39,20 +39,29 @@ management:
   endpoints:
     web:
       exposure:
-        include: health
+        include: health,info,metrics,prometheus
       base-path: /
   endpoint:
     health:
       show-details: always
       probes:
         enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
+      environment: ${SPRING_PROFILES_ACTIVE:dev}
 
-# Logging
+# Logging configuration (overridden by logback-spring.xml)
 logging:
   level:
     root: INFO
     com.fiap.techchallenge: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.web: INFO
+    org.hibernate.SQL: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
 
 mercado-pago.access-token: TEST-6132655548485399-050519-5c52fb1e9a2a627837f4bff581e36402-495359857

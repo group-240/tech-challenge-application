@@ -153,6 +153,7 @@ Este módulo depende dos outputs de:
 - **[🚀 GUIA_AWS_DEPLOY.md](./docs/GUIA_AWS_DEPLOY.md)** - Deploy completo na AWS
 - **[📱 TUTORIAL_API.md](./docs/TUTORIAL_API.md)** - Como usar a API em produção
 - **[🔐 SOLUCAO_GITHUB_SECRETS.md](./docs/SOLUCAO_GITHUB_SECRETS.md)** - Gerenciamento de secrets
+- **[📊 GUIA_OBSERVABILIDADE.md](./docs/GUIA_OBSERVABILIDADE.md)** - Logs e monitoramento completo
 
 ### API Interativa
 - **Swagger UI:** `https://api.tech-challenge.com/api/swagger-ui/index.html`
