@@ -1,0 +1,282 @@
+name: 🧹 Destroy Application - DANGER ZONE
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: 'Type "DESTROY-APPLICATION" to confirm deletion'
+        required: true
+        type: string
+      force:
+        description: 'Force destroy even with errors'
+        required: false
+        type: boolean
+        default: false
+      delete_ecr_images:
+        description: 'Delete all ECR images'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  AWS_REGION: us-east-1
+  TF_VERSION: 1.5.0
+
+jobs:
+  validate-confirmation:
+    name: 🔐 Validate Destruction Request
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Confirmation
+        run: |
+          if [ "${{ inputs.confirmation }}" != "DESTROY-APPLICATION" ]; then
+            echo "❌ Confirmation failed! You must type exactly 'DESTROY-APPLICATION' to proceed."
+            exit 1
+          fi
+          echo "✅ Confirmation validated"
+          echo "⚠️ WARNING: This will DELETE your application deployment!"
+
+  destroy-kubernetes-resources:
+    name: 🗑️ Destroy Kubernetes Resources
+    runs-on: ubuntu-latest
+    needs: validate-confirmation
+    
+    steps:
+      - name: ⚙️ Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: 🔧 Configure kubectl
+        run: |
+          aws eks update-kubeconfig --name tech-challenge-eks --region ${{ env.AWS_REGION }} || echo "EKS cluster not found"
+        continue-on-error: true
+
+      - name: 📋 List Current Resources
+        run: |
+          echo "📊 Current Kubernetes Resources:"
+          kubectl get all -n tech-challenge || echo "Namespace not found"
+        continue-on-error: true
+
+      - name: 🗑️ Delete LoadBalancer Services First
+        run: |
+          echo "🔍 Deleting LoadBalancer services..."
+          kubectl delete svc -n tech-challenge --selector=app=tech-challenge-app || echo "No services found"
+          
+          echo "⏳ Waiting 30 seconds for Load Balancers to be deleted..."
+          sleep 30
+        continue-on-error: true
+
+      - name: 🗑️ Delete All Resources in Namespace
+        run: |
+          echo "🗑️ Deleting all resources in tech-challenge namespace..."
+          kubectl delete all --all -n tech-challenge || echo "Failed to delete resources"
+          
+          # Delete TargetGroupBindings (if any)
+          kubectl delete targetgroupbindings --all -n tech-challenge || echo "No TargetGroupBindings found"
+          
+          # Delete ConfigMaps and Secrets
+          kubectl delete configmaps --all -n tech-challenge || echo "No ConfigMaps found"
+          kubectl delete secrets --all -n tech-challenge || echo "No Secrets found"
+        continue-on-error: true
+
+      - name: 🗑️ Delete Namespace
+        run: |
+          echo "🗑️ Deleting tech-challenge namespace..."
+          kubectl delete namespace tech-challenge || echo "Namespace not found"
+          
+          echo "⏳ Waiting for namespace to be fully deleted..."
+          kubectl wait --for=delete namespace/tech-challenge --timeout=120s || echo "Timeout waiting for namespace deletion"
+        continue-on-error: true
+
+  destroy-terraform:
+    name: 💥 Destroy Terraform Resources
+    runs-on: ubuntu-latest
+    needs: destroy-kubernetes-resources
+    if: always()
+    
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: ⚙️ Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: 🔍 Terraform Init
+        run: |
+          cd terraform
+          terraform init
+        continue-on-error: ${{ inputs.force }}
+
+      - name: 📋 List Resources Before Destroy
+        run: |
+          cd terraform
+          echo "📊 Current Resources in State:"
+          terraform state list || echo "No state found"
+        continue-on-error: true
+
+      - name: 💥 Terraform Destroy
+        run: |
+          cd terraform
+          
+          if [ "${{ inputs.force }}" == "true" ]; then
+            echo "⚠️ FORCE MODE: Will attempt to destroy with -auto-approve"
+            terraform destroy -auto-approve || echo "Some resources failed to destroy"
+          else
+            echo "🗑️ STANDARD MODE: Destroying with -auto-approve"
+            terraform destroy -auto-approve
+          fi
+        continue-on-error: ${{ inputs.force }}
+
+  cleanup-aws-resources:
+    name: 🧹 Clean Up AWS Resources
+    runs-on: ubuntu-latest
+    needs: destroy-terraform
+    if: always()
+    
+    steps:
+      - name: ⚙️ Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: 🧹 Delete ECR Images
+        if: inputs.delete_ecr_images == true
+        run: |
+          echo "⚠️ Deleting ECR images..."
+          
+          REPOSITORY="tech-challenge-app"
+          
+          if aws ecr describe-repositories --repository-names "$REPOSITORY" 2>/dev/null; then
+            echo "Found repository: $REPOSITORY"
+            
+            # Get all image IDs
+            IMAGE_IDS=$(aws ecr list-images --repository-name "$REPOSITORY" --query 'imageIds[*]' --output json)
+            
+            if [ "$IMAGE_IDS" != "[]" ]; then
+              echo "Deleting images from $REPOSITORY..."
+              aws ecr batch-delete-image --repository-name "$REPOSITORY" --image-ids "$IMAGE_IDS" || true
+            else
+              echo "No images to delete"
+            fi
+            
+            # Delete repository
+            echo "Deleting repository: $REPOSITORY"
+            aws ecr delete-repository --repository-name "$REPOSITORY" --force || true
+          else
+            echo "Repository $REPOSITORY not found"
+          fi
+          
+          echo "✅ ECR cleanup completed"
+        continue-on-error: true
+
+      - name: 🧹 Clean Up Load Balancers
+        if: always()
+        run: |
+          echo "🔍 Checking for orphaned Load Balancers..."
+          
+          LBS=$(aws elbv2 describe-load-balancers \
+            --query "LoadBalancers[?contains(LoadBalancerName, 'tech-challenge')].LoadBalancerArn" \
+            --output text)
+          
+          for lb_arn in $LBS; do
+            echo "Deleting Load Balancer: $lb_arn"
+            aws elbv2 delete-load-balancer --load-balancer-arn "$lb_arn" || echo "Failed to delete $lb_arn"
+          done
+          
+          echo "✅ Load Balancer cleanup completed"
+        continue-on-error: true
+
+      - name: 🧹 Clean Up Target Groups
+        if: always()
+        run: |
+          echo "🔍 Checking for orphaned Target Groups..."
+          
+          # Wait a bit for load balancers to be fully deleted
+          sleep 15
+          
+          TGS=$(aws elbv2 describe-target-groups \
+            --query "TargetGroups[?contains(TargetGroupName, 'tech-challenge')].TargetGroupArn" \
+            --output text)
+          
+          for tg_arn in $TGS; do
+            echo "Deleting Target Group: $tg_arn"
+            aws elbv2 delete-target-group --target-group-arn "$tg_arn" || echo "Failed to delete $tg_arn"
+          done
+          
+          echo "✅ Target Group cleanup completed"
+        continue-on-error: true
+
+      - name: 🧹 Clean Up CloudWatch Log Groups
+        if: always()
+        run: |
+          echo "🔍 Cleaning up CloudWatch log groups..."
+          
+          LOG_GROUPS=$(aws logs describe-log-groups \
+            --query "logGroups[?contains(logGroupName, 'tech-challenge-app')].logGroupName" \
+            --output text)
+          
+          for log_group in $LOG_GROUPS; do
+            echo "Deleting log group: $log_group"
+            aws logs delete-log-group --log-group-name "$log_group" || echo "Failed to delete $log_group"
+          done
+          
+          echo "✅ CloudWatch log groups cleanup completed"
+        continue-on-error: true
+
+      - name: 📊 Verify Destruction
+        if: always()
+        run: |
+          echo "🔍 Checking remaining application resources..."
+          
+          echo ""
+          echo "ECR Repositories:"
+          aws ecr describe-repositories \
+            --query "repositories[?contains(repositoryName, 'tech-challenge')].repositoryName" || echo "✅ No repositories found"
+          
+          echo ""
+          echo "Load Balancers:"
+          aws elbv2 describe-load-balancers \
+            --query "LoadBalancers[?contains(LoadBalancerName, 'tech-challenge')].[LoadBalancerName,LoadBalancerArn]" --output table || echo "✅ No load balancers found"
+          
+          echo ""
+          echo "Target Groups:"
+          aws elbv2 describe-target-groups \
+            --query "TargetGroups[?contains(TargetGroupName, 'tech-challenge')].[TargetGroupName,TargetGroupArn]" --output table || echo "✅ No target groups found"
+          
+          echo ""
+          echo "CloudWatch Log Groups:"
+          aws logs describe-log-groups \
+            --query "logGroups[?contains(logGroupName, 'tech-challenge-app')].logGroupName" || echo "✅ No log groups found"
+          
+          echo ""
+          echo "✅ Application destruction verification complete"
+        continue-on-error: true
+
+      - name: 📝 Summary
+        if: always()
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🧹 APPLICATION DESTRUCTION SUMMARY"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "Repository: tech-challenge-application"
+          echo "Timestamp: $(date)"
+          echo "Force Mode: ${{ inputs.force }}"
+          echo "Delete ECR Images: ${{ inputs.delete_ecr_images }}"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
