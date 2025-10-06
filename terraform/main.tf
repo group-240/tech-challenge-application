@@ -13,7 +13,7 @@ terraform {
     bucket         = "tech-challenge-tfstate-533267363894-4"
     key            = "application/terraform.tfstate"
     region         = "us-east-1"
-    dynamodb_table = "tech-challenge-terraform-lock-533267363894-4"
+    dynamodb_table = "tech-challenge-terraform-lock-533267363894"
     encrypt        = true
   }
 }
@@ -207,7 +207,7 @@ resource "kubernetes_manifest" "target_group_binding" {
     kind       = "TargetGroupBinding"
     metadata = {
       name      = "tech-challenge-tgb"
-      namespace = "default"
+      namespace = kubernetes_namespace.tech_challenge.metadata[0].name
     }
     spec = {
       serviceRef = {
