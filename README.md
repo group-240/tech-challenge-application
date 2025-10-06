@@ -7,7 +7,6 @@
 [![Terraform](https://img.shields.io/badge/Terraform-1.5.0-%23623CE4?logo=terraform)](https://www.terraform.io/)
 
 Aplicação Spring Boot com **Clean Architecture** rodando em **AWS EKS** com deploy automático via **GitHub Actions** e **Terraform**.
-
 ---
 
 ## 🏗️ Infraestrutura
